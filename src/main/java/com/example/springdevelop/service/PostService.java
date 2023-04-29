@@ -1,5 +1,7 @@
 package com.example.springdevelop.service;
 
+import com.example.springdevelop.dto.MsgResponseDto;
+import com.example.springdevelop.dto.PostDeleteRequestDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.entity.Post;
@@ -50,5 +52,17 @@ public class PostService {
         post.update(postRequestDto);
 
         return new PostResponseDto(post);
+    }
+
+    public MsgResponseDto deletePost(Long postId, PostDeleteRequestDto postDeleteRequestDto) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 게시글입니다.")
+        );
+
+        if(!post.getPassword().equals(postDeleteRequestDto.getPassword())) {
+            return new MsgResponseDto("삭제 실패");
+        }
+        postRepository.delete(post);
+        return new MsgResponseDto("삭제 성공");
     }
 }

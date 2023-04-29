@@ -63,12 +63,16 @@ public class PostService {
         );
 
         Claims claims = checkTokenAndGetInfo(request);
+        String username = claims.getSubject();
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new NullPointerException("가입하지 않은 username 입니다.")
+        );
 
-        if(!post.getUser().getUsername().equals(claims.getSubject())) {
+        if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
             throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
         }
 
-        post.update(postRequestDto);
+        post.update(postRequestDto, user);
         return new PostResponseDto(post);
     }
 
@@ -78,7 +82,12 @@ public class PostService {
         );
 
         Claims claims = checkTokenAndGetInfo(request);
-        if(!post.getUser().getUsername().equals(claims.getSubject())) {
+        String username = claims.getSubject();
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new NullPointerException("가입하지 않은 username 입니다.")
+        );
+
+        if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
             throw new IllegalArgumentException("직접 작성한 게시글만 삭제할 수 있습니다.");
         }
 

@@ -4,7 +4,12 @@ import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.entity.Post;
+import com.example.springdevelop.entity.User;
 import com.example.springdevelop.repository.PostRepository;
+import com.example.springdevelop.repository.UserRepository;
+import com.example.springdevelop.util.JwtUtil;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +22,25 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional
-    public PostResponseDto writePost(PostRequestDto postRequestDto) {
+    public PostResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
+        String jwt = jwtUtil.resolveToken(request);
+
+        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
+            throw new SecurityException("토큰이 유효하지 않습니다.");
+        }
+        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+
         Post post = new Post(postRequestDto);
+        User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                () -> new NullPointerException("가입하지 않은 username 입니다.")
+        );
+        post.setUser(user);
         postRepository.save(post);
+
         return new PostResponseDto(post);
     }
 

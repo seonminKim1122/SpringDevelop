@@ -4,6 +4,7 @@ import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,8 @@ public class PostController {
 
     private final PostService postService;
     @PostMapping("/write")
-    public PostResponseDto writePost(@RequestBody PostRequestDto postRequestDto) {
-        return postService.writePost(postRequestDto);
+    public PostResponseDto writePost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
+        return postService.writePost(postRequestDto, request);
     }
 
     @GetMapping("/list")

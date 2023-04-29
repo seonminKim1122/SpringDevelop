@@ -14,7 +14,7 @@ public class PostResponseDto {
 
     public PostResponseDto(Post post) {
         this.title = post.getTitle();
-        this.username = post.getUsername();
+        this.username = post.getUser().getUsername();
         this.modifiedAt = post.getModifiedAt().toLocalDate();
         this.content = post.getContent();
     }

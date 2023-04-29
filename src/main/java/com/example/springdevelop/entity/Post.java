@@ -21,12 +21,6 @@ public class Post extends TimeStamped {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
@@ -39,5 +33,9 @@ public class Post extends TimeStamped {
     public void update(PostRequestDto postRequestDto) {
         this.title = postRequestDto.getTitle();
         this.content = postRequestDto.getContent();
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

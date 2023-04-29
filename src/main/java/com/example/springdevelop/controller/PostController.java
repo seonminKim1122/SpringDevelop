@@ -1,7 +1,6 @@
 package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.MsgResponseDto;
-import com.example.springdevelop.dto.PostDeleteRequestDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.service.PostService;
@@ -37,7 +36,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public MsgResponseDto deletePost(@PathVariable Long postId, @RequestBody PostDeleteRequestDto postDeleteRequestDto) {
-        return postService.deletePost(postId, postDeleteRequestDto);
+    public MsgResponseDto deletePost(@PathVariable Long postId) {
+        return postService.deletePost(postId);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.MsgResponseDto;
-import com.example.springdevelop.dto.PostDeleteRequestDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.entity.Post;
@@ -46,23 +45,23 @@ public class PostService {
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-        if (!post.getPassword().equals(postRequestDto.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
+//        if (!post.getPassword().equals(postRequestDto.getPassword())) {
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//        }
         post.update(postRequestDto);
 
         return new PostResponseDto(post);
     }
 
-    public MsgResponseDto deletePost(Long postId, PostDeleteRequestDto postDeleteRequestDto) {
+    public MsgResponseDto deletePost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-        if(!post.getPassword().equals(postDeleteRequestDto.getPassword())) {
-            return new MsgResponseDto("삭제 실패");
-        }
+//        if(!post.getPassword().equals(postDeleteRequestDto.getPassword())) {
+//            return null;
+//        }
         postRepository.delete(post);
-        return new MsgResponseDto("삭제 성공");
+        return null;
     }
 }

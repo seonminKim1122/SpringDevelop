@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final String adminToken = "NyHiUR5IYMREDk2b81flIjvhK";
 
+    @Transactional
     public MsgResponseDto signup(UserRequestDto userRequestDto) {
         Optional<User> found = userRepository.findByUsername(userRequestDto.getUsername());
 
@@ -42,6 +44,7 @@ public class UserService {
         return new MsgResponseDto("회원가입 성공", HttpStatus.OK);
     }
 
+    @Transactional
     public MsgResponseDto login(UserRequestDto userRequestDto, HttpServletResponse response) {
         User user = userRepository.findByUsername(userRequestDto.getUsername()).orElseThrow(
                 () -> new NullPointerException("가입하지 않은 username 입니다.")

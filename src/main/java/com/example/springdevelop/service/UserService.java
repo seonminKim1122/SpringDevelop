@@ -51,7 +51,7 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String jwt = jwtUtil.createToken(user.getUsername());
+        String jwt = jwtUtil.createToken(user.getUsername(), user.getRole());
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwt);
 
         return new MsgResponseDto("로그인 성공", HttpStatus.OK);

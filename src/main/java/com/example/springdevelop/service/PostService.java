@@ -9,9 +9,8 @@ import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.repository.PostRepository;
 import com.example.springdevelop.repository.UserRepository;
+import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.util.JwtUtil;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,9 @@ public class PostService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public GeneralResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto writePost(PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Post post = new Post(postRequestDto);
@@ -64,10 +62,9 @@ public class PostService {
     }
 
     @Transactional
-    public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Post post = findPostById(postId);
@@ -83,10 +80,9 @@ public class PostService {
 
     }
 
-    public MsgResponseDto deletePost(Long postId, HttpServletRequest request) {
+    public MsgResponseDto deletePost(Long postId, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Post post = findPostById(postId);
@@ -101,16 +97,6 @@ public class PostService {
             return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-    }
-
-    public Claims checkTokenAndGetInfo(HttpServletRequest request) {
-        String jwt = jwtUtil.resolveToken(request);
-
-        if (jwt == null || !jwtUtil.validateToken(jwt)) {
-            throw new SecurityException("토큰이 유효하지 않습니다.");
-        }
-
-        return jwtUtil.getUserInfoFromToken(jwt);
     }
 
     public Post findPostById(Long postId) {

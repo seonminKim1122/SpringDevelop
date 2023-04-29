@@ -1,12 +1,12 @@
 package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.GeneralResponseDto;
-import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
+import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.service.PostService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +18,8 @@ public class PostController {
 
     private final PostService postService;
     @PostMapping("/write")
-    public GeneralResponseDto writePost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
-        return postService.writePost(postRequestDto, request);
+    public GeneralResponseDto writePost(@RequestBody PostRequestDto postRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.writePost(postRequestDto, userDetails);
     }
 
     @GetMapping("/search/list")
@@ -33,12 +33,12 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    public GeneralResponseDto updatePost(@PathVariable Long postId, @RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
-        return postService.updatePost(postId, postRequestDto, request);
+    public GeneralResponseDto updatePost(@PathVariable Long postId, @RequestBody PostRequestDto postRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.updatePost(postId, postRequestDto, userDetails);
     }
 
     @DeleteMapping("/{postId}")
-    public GeneralResponseDto deletePost(@PathVariable Long postId, HttpServletRequest request) {
-        return postService.deletePost(postId, request);
+    public GeneralResponseDto deletePost(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.deletePost(postId, userDetails);
     }
 }

@@ -11,9 +11,8 @@ import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.repository.CommentRepository;
 import com.example.springdevelop.repository.PostRepository;
 import com.example.springdevelop.repository.UserRepository;
+import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.util.JwtUtil;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -31,10 +30,9 @@ public class CommentService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public GeneralResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Post post = postRepository.findById(postId).orElseThrow(
@@ -52,10 +50,9 @@ public class CommentService {
     }
 
     @Transactional
-    public GeneralResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Comment comment = findCommentById(commentId);
@@ -72,10 +69,9 @@ public class CommentService {
 
     }
 
-    public MsgResponseDto deleteComment(Long commentId, HttpServletRequest request) {
+    public MsgResponseDto deleteComment(Long commentId, UserDetailsImpl userDetails) {
         try {
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
+            String username = userDetails.getUsername();
             User user = findUserByUsername(username);
 
             Comment comment = findCommentById(commentId);
@@ -90,16 +86,6 @@ public class CommentService {
             return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-    }
-
-    public Claims checkTokenAndGetInfo(HttpServletRequest request) {
-        String jwt = jwtUtil.resolveToken(request);
-
-        if (jwt == null || !jwtUtil.validateToken(jwt)) {
-            throw new SecurityException("토큰이 유효하지 않습니다.");
-        }
-
-        return jwtUtil.getUserInfoFromToken(jwt);
     }
 
     public User findUserByUsername(String username) {

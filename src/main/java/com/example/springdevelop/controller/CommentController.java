@@ -2,6 +2,7 @@ package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.CommentRequestDto;
 import com.example.springdevelop.dto.CommentResponseDto;
+import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class CommentController {
     @PutMapping("/{commentId}")
     public CommentResponseDto updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto commentRequestDto, HttpServletRequest request) {
         return commentService.updateComment(commentId, commentRequestDto, request);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public MsgResponseDto deleteComment(@PathVariable Long commentId, HttpServletRequest request) {
+        return commentService.deleteComment(commentId, request);
     }
 }

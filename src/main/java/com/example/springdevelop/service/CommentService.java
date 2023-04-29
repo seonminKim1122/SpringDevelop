@@ -2,6 +2,7 @@ package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.CommentRequestDto;
 import com.example.springdevelop.dto.CommentResponseDto;
+import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.entity.Comment;
 import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.entity.User;
@@ -12,6 +13,7 @@ import com.example.springdevelop.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +62,21 @@ public class CommentService {
 
         comment.update(commentRequestDto);
         return new CommentResponseDto(comment);
+    }
+
+    public MsgResponseDto deleteComment(Long commentId, HttpServletRequest request) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 댓글입니다.")
+        );
+
+        Claims claims = checkTokenAndGetInfo(request);
+        String username = claims.getSubject();
+
+        if (!comment.getUser().getUsername().equals(username)) {
+            throw new IllegalArgumentException("직접 작성한 댓글만 수정/삭제할 수 있습니다.");
+        }
+        commentRepository.delete(comment);
+        return new MsgResponseDto("삭제 완료", HttpStatus.OK);
     }
 
     public Claims checkTokenAndGetInfo(HttpServletRequest request) {

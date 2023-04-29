@@ -28,10 +28,10 @@ public class UserService {
             throw new IllegalArgumentException("중복된 username 입니다.");
         }
 
-        String role = UserRoleEnum.USER.getAuthority();
+        UserRoleEnum role = UserRoleEnum.USER;
         if (userRequestDto.isAdmin()) {
             if (userRequestDto.getAdminToken().equals(adminToken)) {
-                role = UserRoleEnum.ADMIN.getAuthority();
+                role = UserRoleEnum.ADMIN;
             } else {
                 throw new IllegalArgumentException("관리자 암호가 일치하지 않습니다.");
             }

@@ -22,9 +22,10 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String role;
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
 
-    public User(UserRequestDto userRequestDto, String role) {
+    public User(UserRequestDto userRequestDto, UserRoleEnum role) {
         this.username = userRequestDto.getUsername();
         this.password = userRequestDto.getPassword();
         this.role = role;

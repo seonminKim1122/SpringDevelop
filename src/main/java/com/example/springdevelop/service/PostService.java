@@ -5,6 +5,7 @@ import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.entity.User;
+import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.repository.PostRepository;
 import com.example.springdevelop.repository.UserRepository;
 import com.example.springdevelop.util.JwtUtil;
@@ -62,6 +63,7 @@ public class PostService {
         );
 
         Claims claims = checkTokenAndGetInfo(request);
+
         if(!post.getUser().getUsername().equals(claims.getSubject())) {
             throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
         }

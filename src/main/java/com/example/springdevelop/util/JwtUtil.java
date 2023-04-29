@@ -1,5 +1,6 @@
 package com.example.springdevelop.util;
 
+import com.example.springdevelop.entity.UserRoleEnum;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -38,7 +39,7 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String username, String role) {
+    public String createToken(String username, UserRoleEnum role) {
         Date date = new Date();
 
         return BEARER_PREFIX +

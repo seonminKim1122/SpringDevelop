@@ -2,6 +2,7 @@ package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
+import com.example.springdevelop.dto.PostUpdateRequestDto;
 import com.example.springdevelop.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +28,10 @@ public class PostController {
     @GetMapping("/{postId}")
     public PostResponseDto getPost(@PathVariable Long postId) {
         return postService.getPost(postId);
+    }
+
+    @PutMapping("/{postId}")
+    public PostResponseDto updatePost(@PathVariable Long postId, @RequestBody PostUpdateRequestDto postUpdateRequestDto) {
+        return postService.updatePost(postId, postUpdateRequestDto);
     }
 }

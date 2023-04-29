@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-public class PostResponseDto {
+public class PostResponseDto implements GeneralResponseDto {
     private String title;
     private String username;
     private LocalDate modifiedAt;

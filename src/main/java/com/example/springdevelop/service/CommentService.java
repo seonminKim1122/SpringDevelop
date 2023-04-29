@@ -2,6 +2,7 @@ package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.CommentRequestDto;
 import com.example.springdevelop.dto.CommentResponseDto;
+import com.example.springdevelop.dto.GeneralResponseDto;
 import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.entity.Comment;
 import com.example.springdevelop.entity.Post;
@@ -30,65 +31,79 @@ public class CommentService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public CommentResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        try {
+            Post post = postRepository.findById(postId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
+            );
 
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 게시글입니다.")
-        );
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
 
-        Claims claims = checkTokenAndGetInfo(request);
-        String username = claims.getSubject();
-
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
 
-        Comment comment = new Comment(commentRequestDto, post, user);
-        commentRepository.save(comment);
+            Comment comment = new Comment(commentRequestDto, post, user);
+            commentRepository.save(comment);
 
-        return new CommentResponseDto(comment);
+            return new CommentResponseDto(comment);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Transactional
-    public CommentResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 댓글입니다.")
-        );
+    public GeneralResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        try {
+            Comment comment = commentRepository.findById(commentId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 댓글입니다.")
+            );
 
-        Claims claims = checkTokenAndGetInfo(request);
-        String username = claims.getSubject();
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
 
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
-        if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-            throw new IllegalArgumentException("직접 작성한 댓글만 수정/삭제할 수 있습니다.");
+            if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
+            }
+
+            comment.update(commentRequestDto, user);
+            return new CommentResponseDto(comment);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        comment.update(commentRequestDto, user);
-        return new CommentResponseDto(comment);
     }
 
     public MsgResponseDto deleteComment(Long commentId, HttpServletRequest request) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 댓글입니다.")
-        );
+        try {
+            Comment comment = commentRepository.findById(commentId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 댓글입니다.")
+            );
 
-        Claims claims = checkTokenAndGetInfo(request);
-        String username = claims.getSubject();
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
 
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
-        if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-            throw new IllegalArgumentException("직접 작성한 댓글만 수정/삭제할 수 있습니다.");
+            if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
+            }
+
+            commentRepository.delete(comment);
+            return new MsgResponseDto("삭제 완료", HttpStatus.OK);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        commentRepository.delete(comment);
-        return new MsgResponseDto("삭제 완료", HttpStatus.OK);
     }
 
     public Claims checkTokenAndGetInfo(HttpServletRequest request) {

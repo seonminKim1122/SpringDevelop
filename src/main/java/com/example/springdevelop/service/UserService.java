@@ -24,39 +24,48 @@ public class UserService {
 
     @Transactional
     public MsgResponseDto signup(UserRequestDto userRequestDto) {
-        Optional<User> found = userRepository.findByUsername(userRequestDto.getUsername());
+        try {
+            Optional<User> found = userRepository.findByUsername(userRequestDto.getUsername());
 
-        if(found.isPresent()) {
-            throw new IllegalArgumentException("중복된 username 입니다.");
-        }
-
-        UserRoleEnum role = UserRoleEnum.USER;
-        if (userRequestDto.isAdmin()) {
-            if (userRequestDto.getAdminToken().equals(adminToken)) {
-                role = UserRoleEnum.ADMIN;
-            } else {
-                throw new IllegalArgumentException("관리자 암호가 일치하지 않습니다.");
+            if(found.isPresent()) {
+                throw new IllegalArgumentException("중복된 username 입니다.");
             }
+
+            UserRoleEnum role = UserRoleEnum.USER;
+            if (userRequestDto.isAdmin()) {
+                if (userRequestDto.getAdminToken().equals(adminToken)) {
+                    role = UserRoleEnum.ADMIN;
+                } else {
+                    throw new IllegalArgumentException("관리자 암호가 일치하지 않습니다.");
+                }
+            }
+
+            User user = new User(userRequestDto, role);
+            userRepository.save(user);
+            return new MsgResponseDto("회원가입 성공", HttpStatus.OK);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        User user = new User(userRequestDto, role);
-        userRepository.save(user);
-        return new MsgResponseDto("회원가입 성공", HttpStatus.OK);
     }
 
     @Transactional
     public MsgResponseDto login(UserRequestDto userRequestDto, HttpServletResponse response) {
-        User user = userRepository.findByUsername(userRequestDto.getUsername()).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+        try {
+            User user = userRepository.findByUsername(userRequestDto.getUsername()).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
-        if (!user.getPassword().equals(userRequestDto.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            if (!user.getPassword().equals(userRequestDto.getPassword())) {
+                throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+            }
+
+            String jwt = jwtUtil.createToken(user.getUsername(), user.getRole());
+            response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwt);
+
+            return new MsgResponseDto("로그인 성공", HttpStatus.OK);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-
-        String jwt = jwtUtil.createToken(user.getUsername(), user.getRole());
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwt);
-
-        return new MsgResponseDto("로그인 성공", HttpStatus.OK);
     }
 }

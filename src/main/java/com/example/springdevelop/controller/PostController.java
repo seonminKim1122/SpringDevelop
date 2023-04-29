@@ -1,5 +1,6 @@
 package com.example.springdevelop.controller;
 
+import com.example.springdevelop.dto.GeneralResponseDto;
 import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
@@ -17,7 +18,7 @@ public class PostController {
 
     private final PostService postService;
     @PostMapping("/write")
-    public PostResponseDto writePost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto writePost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
         return postService.writePost(postRequestDto, request);
     }
 
@@ -27,17 +28,17 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public PostResponseDto getPost(@PathVariable Long postId) {
+    public GeneralResponseDto getPost(@PathVariable Long postId) {
         return postService.getPost(postId);
     }
 
     @PutMapping("/{postId}")
-    public PostResponseDto updatePost(@PathVariable Long postId, @RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto updatePost(@PathVariable Long postId, @RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
         return postService.updatePost(postId, postRequestDto, request);
     }
 
     @DeleteMapping("/{postId}")
-    public MsgResponseDto deletePost(@PathVariable Long postId, HttpServletRequest request) {
+    public GeneralResponseDto deletePost(@PathVariable Long postId, HttpServletRequest request) {
         return postService.deletePost(postId, request);
     }
 }

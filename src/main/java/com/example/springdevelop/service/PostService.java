@@ -1,5 +1,6 @@
 package com.example.springdevelop.service;
 
+import com.example.springdevelop.dto.GeneralResponseDto;
 import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
@@ -28,18 +29,22 @@ public class PostService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public PostResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
+    public GeneralResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
+        try {
+            Claims claims = checkTokenAndGetInfo(request);
 
-        Claims claims = checkTokenAndGetInfo(request);
+            Post post = new Post(postRequestDto);
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
+            post.setUser(user);
+            postRepository.save(post);
 
-        Post post = new Post(postRequestDto);
-        User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
-        post.setUser(user);
-        postRepository.save(post);
+            return new PostResponseDto(post);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
-        return new PostResponseDto(post);
     }
 
     @Transactional(readOnly = true)
@@ -49,50 +54,65 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResponseDto getPost(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 게시글입니다.")
-        );
-        return new PostResponseDto(post);
+    public GeneralResponseDto getPost(Long postId) {
+        try {
+            Post post = postRepository.findById(postId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
+            );
+            return new PostResponseDto(post);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 게시글입니다.")
-        );
+    public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
+        try {
+            Post post = postRepository.findById(postId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
+            );
 
-        Claims claims = checkTokenAndGetInfo(request);
-        String username = claims.getSubject();
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
-        if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-            throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
+            if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
+            }
+
+            post.update(postRequestDto, user);
+            return new PostResponseDto(post);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        post.update(postRequestDto, user);
-        return new PostResponseDto(post);
     }
 
     public MsgResponseDto deletePost(Long postId, HttpServletRequest request) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 게시글입니다.")
-        );
+        try {
+            Post post = postRepository.findById(postId).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
+            );
 
-        Claims claims = checkTokenAndGetInfo(request);
-        String username = claims.getSubject();
-        User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("가입하지 않은 username 입니다.")
-        );
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
+            );
 
-        if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-            throw new IllegalArgumentException("직접 작성한 게시글만 삭제할 수 있습니다.");
+            if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
+            }
+
+            postRepository.delete(post);
+            return new MsgResponseDto("삭제 성공", HttpStatus.OK);
+        } catch (Exception e) {
+            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        postRepository.delete(post);
-        return new MsgResponseDto("삭제 성공", HttpStatus.OK);
     }
 
     public Claims checkTokenAndGetInfo(HttpServletRequest request) {

@@ -1,5 +1,6 @@
 package com.example.springdevelop.entity;
 
+import com.example.springdevelop.dto.UserRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,5 +21,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-
+    public User(UserRequestDto userRequestDto) {
+        this.username = userRequestDto.getUsername();
+        this.password = userRequestDto.getPassword();
+    }
 }

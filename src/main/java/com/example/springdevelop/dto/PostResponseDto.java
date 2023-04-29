@@ -20,6 +20,6 @@ public class PostResponseDto {
         this.username = post.getUser().getUsername();
         this.modifiedAt = post.getModifiedAt().toLocalDate();
         this.content = post.getContent();
-        this.comments = post.getComments().stream().map(CommentResponseDto::new).collect(Collectors.toList());
+        this.comments = post.getComments().stream().sorted((c1, c2) -> c2.getModifiedAt().compareTo(c1.getModifiedAt())).map(CommentResponseDto::new).collect(Collectors.toList());
     }
 }

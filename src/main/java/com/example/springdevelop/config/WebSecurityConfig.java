@@ -1,5 +1,6 @@
 package com.example.springdevelop.config;
 
+import com.example.springdevelop.security.CustomAuthenticationEntryPoint;
 import com.example.springdevelop.security.JwtAuthFilter;
 import com.example.springdevelop.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -45,6 +47,9 @@ public class WebSecurityConfig {
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http.formLogin();
+
+        // 401 에러 핸들링
+        http.exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint);
 
         return http.build();
     }

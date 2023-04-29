@@ -21,10 +21,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private UserRoleEnum role;
+    @Column(nullable = false)
+    private String role;
 
-    public User(UserRequestDto userRequestDto) {
+    public User(UserRequestDto userRequestDto, String role) {
         this.username = userRequestDto.getUsername();
         this.password = userRequestDto.getPassword();
+        this.role = role;
     }
 }

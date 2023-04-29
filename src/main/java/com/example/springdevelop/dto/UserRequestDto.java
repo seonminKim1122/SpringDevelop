@@ -15,4 +15,8 @@ public class UserRequestDto {
     // 알파벳 대소문자, 숫자로 구성
     @Pattern(regexp = "[A-Za-z0-9]{8,15}")
     private String password;
+
+    private boolean admin = false;
+
+    private String adminToken;
 }

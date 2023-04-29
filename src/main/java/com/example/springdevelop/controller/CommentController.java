@@ -17,4 +17,9 @@ public class CommentController {
     public CommentResponseDto writeComment(@PathVariable Long postId, @RequestBody CommentRequestDto commentRequestDto, HttpServletRequest request) {
         return commentService.writeComment(postId, commentRequestDto, request);
     }
+
+    @PutMapping("/{commentId}")
+    public CommentResponseDto updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        return commentService.updateComment(commentId, commentRequestDto, request);
+    }
 }

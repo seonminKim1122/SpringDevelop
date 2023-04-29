@@ -45,6 +45,23 @@ public class CommentService {
         return new CommentResponseDto(comment);
     }
 
+    @Transactional
+    public CommentResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 댓글입니다.")
+        );
+
+        Claims claims = checkTokenAndGetInfo(request);
+        String username = claims.getSubject();
+
+        if (!comment.getUser().getUsername().equals(username)) {
+            throw new IllegalArgumentException("직접 작성한 댓글만 수정/삭제할 수 있습니다.");
+        }
+
+        comment.update(commentRequestDto);
+        return new CommentResponseDto(comment);
+    }
+
     public Claims checkTokenAndGetInfo(HttpServletRequest request) {
         String jwt = jwtUtil.resolveToken(request);
 

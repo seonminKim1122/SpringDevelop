@@ -28,12 +28,8 @@ public class PostService {
 
     @Transactional
     public PostResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
-        String jwt = jwtUtil.resolveToken(request);
 
-        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
-            throw new SecurityException("토큰이 유효하지 않습니다.");
-        }
-        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+        Claims claims = checkTokenAndGetInfo(request);
 
         Post post = new Post(postRequestDto);
         User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
@@ -65,13 +61,7 @@ public class PostService {
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-        String jwt = jwtUtil.resolveToken(request);
-
-        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
-            throw new SecurityException("토큰이 유효하지 않습니다.");
-        }
-
-        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+        Claims claims = checkTokenAndGetInfo(request);
         if(!post.getUser().getUsername().equals(claims.getSubject())) {
             throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
         }
@@ -85,18 +75,22 @@ public class PostService {
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-        String jwt = jwtUtil.resolveToken(request);
-
-        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
-            throw new SecurityException("토큰이 유효하지 않습니다.");
-        }
-
-        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+        Claims claims = checkTokenAndGetInfo(request);
         if(!post.getUser().getUsername().equals(claims.getSubject())) {
             throw new IllegalArgumentException("직접 작성한 게시글만 삭제할 수 있습니다.");
         }
 
         postRepository.delete(post);
         return new MsgResponseDto("삭제 성공", HttpStatus.OK);
+    }
+
+    public Claims checkTokenAndGetInfo(HttpServletRequest request) {
+        String jwt = jwtUtil.resolveToken(request);
+
+        if (jwt == null || !jwtUtil.validateToken(jwt)) {
+            throw new SecurityException("토큰이 유효하지 않습니다.");
+        }
+
+        return jwtUtil.getUserInfoFromToken(jwt);
     }
 }

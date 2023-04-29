@@ -26,4 +26,11 @@ public class PostService {
         List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc();
         return posts.stream().map(PostResponseDto::new).collect(Collectors.toList());
     }
+
+    public PostResponseDto getPost(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 게시글입니다.")
+        );
+        return new PostResponseDto(post);
+    }
 }

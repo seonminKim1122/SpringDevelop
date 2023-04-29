@@ -32,11 +32,10 @@ public class PostService {
     public GeneralResponseDto writePost(PostRequestDto postRequestDto, HttpServletRequest request) {
         try {
             Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
+            User user = findUserByUsername(username);
 
             Post post = new Post(postRequestDto);
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
             post.setUser(user);
             postRepository.save(post);
 
@@ -56,9 +55,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public GeneralResponseDto getPost(Long postId) {
         try {
-            Post post = postRepository.findById(postId).orElseThrow(
-                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
-            );
+            Post post = findPostById(postId);
             return new PostResponseDto(post);
         } catch (Exception e) {
             return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -69,16 +66,11 @@ public class PostService {
     @Transactional
     public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
         try {
-            Post post = postRepository.findById(postId).orElseThrow(
-                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
-            );
-
             Claims claims = checkTokenAndGetInfo(request);
             String username = claims.getSubject();
-            User user = userRepository.findByUsername(username).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
+            User user = findUserByUsername(username);
 
+            Post post = findPostById(postId);
             if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
             }
@@ -93,15 +85,11 @@ public class PostService {
 
     public MsgResponseDto deletePost(Long postId, HttpServletRequest request) {
         try {
-            Post post = postRepository.findById(postId).orElseThrow(
-                    () -> new NullPointerException("존재하지 않는 게시글입니다.")
-            );
-
             Claims claims = checkTokenAndGetInfo(request);
             String username = claims.getSubject();
-            User user = userRepository.findByUsername(username).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
+            User user = findUserByUsername(username);
+
+            Post post = findPostById(postId);
 
             if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
@@ -123,5 +111,17 @@ public class PostService {
         }
 
         return jwtUtil.getUserInfoFromToken(jwt);
+    }
+
+    public Post findPostById(Long postId) {
+        return postRepository.findById(postId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 게시글입니다.")
+        );
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new NullPointerException("회원을 찾을 수 없습니다.")
+        );
     }
 }

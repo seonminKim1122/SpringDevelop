@@ -33,17 +33,13 @@ public class CommentService {
     @Transactional
     public GeneralResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
         try {
+            Claims claims = checkTokenAndGetInfo(request);
+            String username = claims.getSubject();
+            User user = findUserByUsername(username);
+
             Post post = postRepository.findById(postId).orElseThrow(
                     () -> new NullPointerException("존재하지 않는 게시글입니다.")
             );
-
-            Claims claims = checkTokenAndGetInfo(request);
-            String username = claims.getSubject();
-
-            User user = userRepository.findByUsername(username).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
-
 
             Comment comment = new Comment(commentRequestDto, post, user);
             commentRepository.save(comment);
@@ -58,16 +54,11 @@ public class CommentService {
     @Transactional
     public GeneralResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
         try {
-            Comment comment = commentRepository.findById(commentId).orElseThrow(
-                    () -> new NullPointerException("존재하지 않는 댓글입니다.")
-            );
-
             Claims claims = checkTokenAndGetInfo(request);
             String username = claims.getSubject();
+            User user = findUserByUsername(username);
 
-            User user = userRepository.findByUsername(username).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
+            Comment comment = findCommentById(commentId);
 
             if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
@@ -83,16 +74,11 @@ public class CommentService {
 
     public MsgResponseDto deleteComment(Long commentId, HttpServletRequest request) {
         try {
-            Comment comment = commentRepository.findById(commentId).orElseThrow(
-                    () -> new NullPointerException("존재하지 않는 댓글입니다.")
-            );
-
             Claims claims = checkTokenAndGetInfo(request);
             String username = claims.getSubject();
+            User user = findUserByUsername(username);
 
-            User user = userRepository.findByUsername(username).orElseThrow(
-                    () -> new NullPointerException("회원을 찾을 수 없습니다.")
-            );
+            Comment comment = findCommentById(commentId);
 
             if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
@@ -114,5 +100,17 @@ public class CommentService {
         }
 
         return jwtUtil.getUserInfoFromToken(jwt);
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new NullPointerException("회원을 찾을 수 없습니다.")
+        );
+    }
+
+    public Comment findCommentById(Long commentId) {
+        return commentRepository.findById(commentId).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 댓글입니다.")
+        );
     }
 }

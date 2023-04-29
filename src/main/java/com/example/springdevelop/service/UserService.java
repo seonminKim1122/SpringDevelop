@@ -28,4 +28,16 @@ public class UserService {
         userRepository.save(user);
         return new MsgResponseDto("회원가입 성공", HttpStatus.OK);
     }
+
+    public MsgResponseDto login(UserRequestDto userRequestDto) {
+        User user = userRepository.findByUsername(userRequestDto.getUsername()).orElseThrow(
+                () -> new NullPointerException("가입하지 않은 username 입니다.")
+        );
+
+        if (!user.getPassword().equals(userRequestDto.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return new MsgResponseDto("로그인 성공", HttpStatus.OK);
+    }
 }

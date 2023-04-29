@@ -3,6 +3,7 @@ package com.example.springdevelop.controller;
 import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.UserRequestDto;
 import com.example.springdevelop.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public MsgResponseDto login(@RequestBody UserRequestDto userRequestDto) {
-        return userService.login(userRequestDto);
+    public MsgResponseDto login(@RequestBody UserRequestDto userRequestDto, HttpServletResponse response) {
+        return userService.login(userRequestDto, response);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.springdevelop.entity;
 
 import com.example.springdevelop.dto.PostRequestDto;
-import com.example.springdevelop.dto.PostUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,8 +34,9 @@ public class Post extends TimeStamped {
         this.password = postRequestDto.getPassword();
     }
 
-    public void update(PostUpdateRequestDto postUpdateRequestDto) {
-        this.title = postUpdateRequestDto.getTitle();
-        this.content = postUpdateRequestDto.getContent();
+    public void update(PostRequestDto postRequestDto) {
+        this.title = postRequestDto.getTitle();
+        this.username = postRequestDto.getUsername();
+        this.content = postRequestDto.getContent();
     }
 }

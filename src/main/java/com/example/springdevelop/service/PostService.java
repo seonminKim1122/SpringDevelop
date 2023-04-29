@@ -2,7 +2,6 @@ package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
-import com.example.springdevelop.dto.PostUpdateRequestDto;
 import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,15 +39,15 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
+    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-        if (!post.getPassword().equals(postUpdateRequestDto.getPassword())) {
+        if (!post.getPassword().equals(postRequestDto.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        post.update(postUpdateRequestDto);
+        post.update(postRequestDto);
 
         return new PostResponseDto(post);
     }

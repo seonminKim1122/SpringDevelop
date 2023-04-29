@@ -7,6 +7,9 @@ import com.example.springdevelop.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -17,5 +20,10 @@ public class PostService {
         Post post = new Post(postRequestDto);
         postRepository.save(post);
         return new PostResponseDto(post);
+    }
+
+    public List<PostResponseDto> getAllPosts() {
+        List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc();
+        return posts.stream().map(PostResponseDto::new).collect(Collectors.toList());
     }
 }

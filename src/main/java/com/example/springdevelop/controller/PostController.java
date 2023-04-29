@@ -4,10 +4,9 @@ import com.example.springdevelop.dto.PostRequestDto;
 import com.example.springdevelop.dto.PostResponseDto;
 import com.example.springdevelop.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/post")
@@ -18,5 +17,10 @@ public class PostController {
     @PostMapping("/write")
     public PostResponseDto writePost(@RequestBody PostRequestDto postRequestDto) {
         return postService.writePost(postRequestDto);
+    }
+
+    @GetMapping("/list")
+    public List<PostResponseDto> getAllPosts() {
+        return postService.getAllPosts();
     }
 }

@@ -8,9 +8,7 @@ import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.repository.PostRepository;
-import com.example.springdevelop.repository.UserRepository;
 import com.example.springdevelop.security.UserDetailsImpl;
-import com.example.springdevelop.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,14 +22,11 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     @Transactional
     public GeneralResponseDto writePost(PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Post post = new Post(postRequestDto);
             post.setUser(user);
@@ -64,11 +59,10 @@ public class PostService {
     @Transactional
     public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Post post = findPostById(postId);
-            if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
             }
 
@@ -82,12 +76,11 @@ public class PostService {
 
     public MsgResponseDto deletePost(Long postId, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Post post = findPostById(postId);
 
-            if(!post.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
             }
 
@@ -102,12 +95,6 @@ public class PostService {
     public Post findPostById(Long postId) {
         return postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
-        );
-    }
-
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("회원을 찾을 수 없습니다.")
         );
     }
 }

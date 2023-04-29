@@ -10,9 +10,7 @@ import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.repository.CommentRepository;
 import com.example.springdevelop.repository.PostRepository;
-import com.example.springdevelop.repository.UserRepository;
 import com.example.springdevelop.security.UserDetailsImpl;
-import com.example.springdevelop.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -26,14 +24,11 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     @Transactional
     public GeneralResponseDto writeComment(Long postId, CommentRequestDto commentRequestDto, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Post post = postRepository.findById(postId).orElseThrow(
                     () -> new NullPointerException("존재하지 않는 게시글입니다.")
@@ -52,12 +47,11 @@ public class CommentService {
     @Transactional
     public GeneralResponseDto updateComment(Long commentId, CommentRequestDto commentRequestDto, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Comment comment = findCommentById(commentId);
 
-            if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            if (!comment.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
             }
 
@@ -71,12 +65,11 @@ public class CommentService {
 
     public MsgResponseDto deleteComment(Long commentId, UserDetailsImpl userDetails) {
         try {
-            String username = userDetails.getUsername();
-            User user = findUserByUsername(username);
+            User user = userDetails.getUser();
 
             Comment comment = findCommentById(commentId);
 
-            if (!comment.getUser().getUsername().equals(username) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            if (!comment.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
                 throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
             }
 
@@ -86,12 +79,6 @@ public class CommentService {
             return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-    }
-
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new NullPointerException("회원을 찾을 수 없습니다.")
-        );
     }
 
     public Comment findCommentById(Long commentId) {

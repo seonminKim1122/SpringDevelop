@@ -11,6 +11,7 @@ import com.example.springdevelop.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,8 +70,8 @@ public class PostService {
         if (!(jwt != null && jwtUtil.validateToken(jwt))) {
             throw new SecurityException("토큰이 유효하지 않습니다.");
         }
-        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
 
+        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
         if(!post.getUser().getUsername().equals(claims.getSubject())) {
             throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
         }
@@ -79,15 +80,23 @@ public class PostService {
         return new PostResponseDto(post);
     }
 
-    public MsgResponseDto deletePost(Long postId) {
+    public MsgResponseDto deletePost(Long postId, HttpServletRequest request) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-//        if(!post.getPassword().equals(postDeleteRequestDto.getPassword())) {
-//            return null;
-//        }
+        String jwt = jwtUtil.resolveToken(request);
+
+        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
+            throw new SecurityException("토큰이 유효하지 않습니다.");
+        }
+
+        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+        if(!post.getUser().getUsername().equals(claims.getSubject())) {
+            throw new IllegalArgumentException("직접 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
         postRepository.delete(post);
-        return null;
+        return new MsgResponseDto("삭제 성공", HttpStatus.OK);
     }
 }

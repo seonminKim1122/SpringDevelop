@@ -37,7 +37,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public MsgResponseDto deletePost(@PathVariable Long postId) {
-        return postService.deletePost(postId);
+    public MsgResponseDto deletePost(@PathVariable Long postId, HttpServletRequest request) {
+        return postService.deletePost(postId, request);
     }
 }

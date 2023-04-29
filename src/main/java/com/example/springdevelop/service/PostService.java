@@ -59,16 +59,23 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto) {
+    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 게시글입니다.")
         );
 
-//        if (!post.getPassword().equals(postRequestDto.getPassword())) {
-//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-//        }
-        post.update(postRequestDto);
+        String jwt = jwtUtil.resolveToken(request);
 
+        if (!(jwt != null && jwtUtil.validateToken(jwt))) {
+            throw new SecurityException("토큰이 유효하지 않습니다.");
+        }
+        Claims claims = jwtUtil.getUserInfoFromToken(jwt);
+
+        if(!post.getUser().getUsername().equals(claims.getSubject())) {
+            throw new IllegalArgumentException("직접 작성한 게시글만 수정할 수 있습니다.");
+        }
+
+        post.update(postRequestDto);
         return new PostResponseDto(post);
     }
 

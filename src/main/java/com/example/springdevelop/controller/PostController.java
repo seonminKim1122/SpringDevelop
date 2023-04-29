@@ -22,12 +22,12 @@ public class PostController {
         return postService.writePost(postRequestDto, request);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/search/list")
     public List<PostResponseDto> getAllPosts() {
         return postService.getAllPosts();
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/search/{postId}")
     public GeneralResponseDto getPost(@PathVariable Long postId) {
         return postService.getPost(postId);
     }

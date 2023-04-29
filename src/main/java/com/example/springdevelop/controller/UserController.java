@@ -4,6 +4,7 @@ import com.example.springdevelop.dto.MsgResponseDto;
 import com.example.springdevelop.dto.UserRequestDto;
 import com.example.springdevelop.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public class UserController {
 
     private final UserService userService;
     @PostMapping("/signup")
-    public MsgResponseDto signup(@RequestBody UserRequestDto userRequestDto) {
+    public MsgResponseDto signup(@Valid @RequestBody UserRequestDto userRequestDto) {
         return userService.signup(userRequestDto);
     }
 

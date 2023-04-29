@@ -21,6 +21,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private UserRoleEnum role;
+
     public User(UserRequestDto userRequestDto) {
         this.username = userRequestDto.getUsername();
         this.password = userRequestDto.getPassword();

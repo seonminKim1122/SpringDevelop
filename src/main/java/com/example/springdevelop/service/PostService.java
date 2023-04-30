@@ -8,8 +8,10 @@ import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.entity.PostLike;
 import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
+import com.example.springdevelop.exception.ErrorCode;
 import com.example.springdevelop.repository.PostLikeRepository;
 import com.example.springdevelop.repository.PostRepository;
+import com.example.springdevelop.exception.CustomException;
 import com.example.springdevelop.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,18 +31,13 @@ public class PostService {
 
     @Transactional
     public GeneralResponseDto writePost(PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
-        try {
-            User user = userDetails.getUser();
+        User user = userDetails.getUser();
 
-            Post post = new Post(postRequestDto);
-            post.setUser(user);
-            postRepository.save(post);
+        Post post = new Post(postRequestDto);
+        post.setUser(user);
+        postRepository.save(post);
 
-            return new PostResponseDto(post);
-        } catch (Exception e) {
-            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
+        return new PostResponseDto(post);
     }
 
     @Transactional(readOnly = true)
@@ -51,80 +48,60 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public GeneralResponseDto getPost(Long postId) {
-        try {
-            Post post = findPostById(postId);
-            return new PostResponseDto(post);
-        } catch (Exception e) {
-            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
+        Post post = findPostById(postId);
+        return new PostResponseDto(post);
     }
 
     @Transactional
     public GeneralResponseDto updatePost(Long postId, PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
-        try {
-            User user = userDetails.getUser();
+        User user = userDetails.getUser();
 
-            Post post = findPostById(postId);
-            if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
-            }
-
-            post.update(postRequestDto, user);
-            return new PostResponseDto(post);
-        } catch (Exception e) {
-            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        Post post = findPostById(postId);
+        if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_REQUEST);
         }
 
+        post.update(postRequestDto, user);
+        return new PostResponseDto(post);
     }
 
     @Transactional
     public MsgResponseDto deletePost(Long postId, UserDetailsImpl userDetails) {
-        try {
-            User user = userDetails.getUser();
+        User user = userDetails.getUser();
 
-            Post post = findPostById(postId);
+        Post post = findPostById(postId);
 
-            if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
-                throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
-            }
-
-            postRepository.delete(post);
-            return new MsgResponseDto("삭제 성공", HttpStatus.OK);
-        } catch (Exception e) {
-            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        if(!post.getUser().getUsername().equals(user.getUsername()) && !(user.getRole() == UserRoleEnum.ADMIN)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_REQUEST);
         }
 
+        postRepository.delete(post);
+        return new MsgResponseDto("삭제 성공", HttpStatus.OK);
     }
 
     @Transactional
     public GeneralResponseDto likePost(Long postId, UserDetailsImpl userDetails) {
-        try {
-            Post post = findPostById(postId);
-            User user = userDetails.getUser();
+        Post post = findPostById(postId);
+        User user = userDetails.getUser();
 
-            // 이미 누른 적 있으면 좋아요 취소
-            Optional<PostLike> found = postLikeRepository.findByPostAndUser(post, user);
-            if (found.isPresent()) {
-                postLikeRepository.delete(found.get());
-                post.setLikes(post.getLikes() - 1);
-                return new MsgResponseDto("좋아요 취소", HttpStatus.OK);
-            }
-
-            // 누른 적 없으면 좋아요
-            PostLike postLike = new PostLike(post, user);
-            postLikeRepository.save(postLike);
-
-            return new MsgResponseDto("좋아요", HttpStatus.OK);
-        } catch (Exception e) {
-            return new MsgResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST);
+        // 이미 누른 적 있으면 좋아요 취소
+        Optional<PostLike> found = postLikeRepository.findByPostAndUser(post, user);
+        if (found.isPresent()) {
+            postLikeRepository.delete(found.get());
+            post.setLikes(post.getLikes() - 1);
+            return new MsgResponseDto("좋아요 취소", HttpStatus.OK);
         }
 
+        // 누른 적 없으면 좋아요
+        PostLike postLike = new PostLike(post, user);
+        postLikeRepository.save(postLike);
+
+        return new MsgResponseDto("좋아요", HttpStatus.OK);
     }
 
     public Post findPostById(Long postId) {
         return postRepository.findById(postId).orElseThrow(
-                () -> new NullPointerException("존재하지 않는 게시글입니다.")
+                () -> new CustomException(ErrorCode.NONEXISTENT_POST)
         );
     }
 }

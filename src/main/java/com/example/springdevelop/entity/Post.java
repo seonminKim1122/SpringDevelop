@@ -24,12 +24,18 @@ public class Post extends TimeStamped {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private int likes = 0;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<PostLike> postLikes = new ArrayList<>();
 
     public Post(PostRequestDto postRequestDto) {
         this.title = postRequestDto.getTitle();
@@ -44,5 +50,9 @@ public class Post extends TimeStamped {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 }

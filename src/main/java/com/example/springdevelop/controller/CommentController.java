@@ -29,4 +29,9 @@ public class CommentController {
     public MsgResponseDto deleteComment(@PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return commentService.deleteComment(commentId, userDetails);
     }
+
+    @PostMapping("/like/{commentId}")
+    public GeneralResponseDto likeComment(@PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return commentService.likeComment(commentId, userDetails);
+    }
 }

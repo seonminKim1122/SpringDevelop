@@ -44,4 +44,9 @@ public class PostController {
     public GeneralResponseDto deletePost(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return postService.deletePost(postId, userDetails);
     }
+
+    @PostMapping("/like/{postId}")
+    public GeneralResponseDto likePost(@PathVariable Long postId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return postService.likePost(postId, userDetails);
+    }
 }

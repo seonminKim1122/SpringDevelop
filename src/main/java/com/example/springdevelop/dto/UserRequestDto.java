@@ -2,8 +2,10 @@ package com.example.springdevelop.dto;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class UserRequestDto {
 
     // 최소 4자 이상, 10자 이하

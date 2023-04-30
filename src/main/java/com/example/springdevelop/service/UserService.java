@@ -9,6 +9,7 @@ import com.example.springdevelop.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final String adminToken = "NyHiUR5IYMREDk2b81flIjvhK";
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public MsgResponseDto signup(UserRequestDto userRequestDto) {
@@ -40,6 +42,7 @@ public class UserService {
                 }
             }
 
+            userRequestDto.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
             User user = new User(userRequestDto, role);
             userRepository.save(user);
             return new MsgResponseDto("회원가입 성공", HttpStatus.OK);
@@ -56,7 +59,7 @@ public class UserService {
                     () -> new NullPointerException("회원을 찾을 수 없습니다.")
             );
 
-            if (!user.getPassword().equals(userRequestDto.getPassword())) {
+            if (!passwordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
                 throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
             }
 

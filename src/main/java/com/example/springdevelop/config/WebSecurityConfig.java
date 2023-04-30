@@ -28,6 +28,12 @@ public class WebSecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        // 비밀번호 암호화
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         // h2-console 사용 및 resources 접근 허용
         return (web) -> web.ignoring()

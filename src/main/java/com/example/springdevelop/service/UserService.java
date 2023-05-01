@@ -1,12 +1,14 @@
 package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.MsgResponseDto;
+import com.example.springdevelop.dto.PasswordRequestDto;
 import com.example.springdevelop.dto.UserRequestDto;
 import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
 import com.example.springdevelop.exception.ErrorCode;
 import com.example.springdevelop.repository.UserRepository;
 import com.example.springdevelop.exception.CustomException;
+import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,12 +58,25 @@ public class UserService {
         );
 
         if (!passwordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.WRONG_LOGIN_INFO);
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
         }
 
         String jwt = jwtUtil.createToken(user.getUsername(), user.getRole());
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwt);
 
         return new MsgResponseDto("로그인 성공", HttpStatus.OK);
+    }
+
+    @Transactional
+    public MsgResponseDto withdrawl(PasswordRequestDto passwordRequestDto, UserDetailsImpl userDetails) {
+        User user = userDetails.getUser();
+
+        if (!passwordEncoder.matches(passwordRequestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+        }
+
+        userRepository.delete(user);
+
+        return new MsgResponseDto("회원 탈퇴 성공", HttpStatus.OK);
     }
 }

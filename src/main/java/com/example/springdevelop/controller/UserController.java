@@ -1,15 +1,15 @@
 package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.MsgResponseDto;
+import com.example.springdevelop.dto.PasswordRequestDto;
 import com.example.springdevelop.dto.UserRequestDto;
+import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
@@ -25,5 +25,10 @@ public class UserController {
     @PostMapping("/login")
     public MsgResponseDto login(@RequestBody UserRequestDto userRequestDto, HttpServletResponse response) {
         return userService.login(userRequestDto, response);
+    }
+
+    @DeleteMapping("withdrawl")
+    public MsgResponseDto withdrawl(@RequestBody PasswordRequestDto passwordRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.withdrawl(passwordRequestDto, userDetails);
     }
 }

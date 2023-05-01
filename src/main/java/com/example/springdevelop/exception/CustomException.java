@@ -1,6 +1,5 @@
 package com.example.springdevelop.exception;
 
-import com.example.springdevelop.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter

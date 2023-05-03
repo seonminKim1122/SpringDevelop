@@ -1,26 +1,23 @@
 package com.example.springdevelop.service;
 
-import com.example.springdevelop.dto.GeneralResponseDto;
-import com.example.springdevelop.dto.MsgResponseDto;
-import com.example.springdevelop.dto.PostRequestDto;
-import com.example.springdevelop.dto.PostResponseDto;
+import com.example.springdevelop.dto.*;
 import com.example.springdevelop.entity.Post;
 import com.example.springdevelop.entity.PostLike;
 import com.example.springdevelop.entity.User;
 import com.example.springdevelop.entity.UserRoleEnum;
+import com.example.springdevelop.exception.CustomException;
 import com.example.springdevelop.exception.ErrorCode;
 import com.example.springdevelop.repository.PostLikeRepository;
 import com.example.springdevelop.repository.PostRepository;
-import com.example.springdevelop.exception.CustomException;
 import com.example.springdevelop.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,9 +38,11 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> getAllPosts() {
-        List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc();
-        return posts.stream().map(PostResponseDto::new).collect(Collectors.toList());
+    public List<PostWithCommentCountDto> getAllPosts(PageRequestDto pageRequestDto) {
+//        List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc();
+//        return posts.stream().map(PostResponseDto::new).collect(Collectors.toList());
+        Page<PostWithCommentCountDto> posts = postRepository.listOfPost(pageRequestDto.createPageable());
+        return posts.getContent();
     }
 
     @Transactional(readOnly = true)

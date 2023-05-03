@@ -1,13 +1,12 @@
 package com.example.springdevelop.controller;
 
 import com.example.springdevelop.dto.GeneralResponseDto;
+import com.example.springdevelop.dto.PageRequestDto;
 import com.example.springdevelop.dto.PostRequestDto;
-import com.example.springdevelop.dto.PostResponseDto;
-import com.example.springdevelop.entity.UserRoleEnum;
+import com.example.springdevelop.dto.PostWithCommentCountDto;
 import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +25,8 @@ public class PostController {
     }
 
     @GetMapping("/search/list")
-    public List<PostResponseDto> getAllPosts() {
-        return postService.getAllPosts();
+    public List<PostWithCommentCountDto> getAllPosts(@ModelAttribute PageRequestDto pageRequestDto) {
+        return postService.getAllPosts(pageRequestDto);
     }
 
     @GetMapping("/search/{postId}")

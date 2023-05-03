@@ -1,17 +1,17 @@
 package com.example.springdevelop.service;
 
 import com.example.springdevelop.dto.*;
-import com.example.springdevelop.entity.Post;
-import com.example.springdevelop.entity.PostLike;
-import com.example.springdevelop.entity.User;
-import com.example.springdevelop.entity.UserRoleEnum;
+import com.example.springdevelop.entity.*;
 import com.example.springdevelop.exception.CustomException;
 import com.example.springdevelop.exception.ErrorCode;
+import com.example.springdevelop.repository.CommentRepository;
 import com.example.springdevelop.repository.PostLikeRepository;
 import com.example.springdevelop.repository.PostRepository;
 import com.example.springdevelop.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +25,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public GeneralResponseDto writePost(PostRequestDto postRequestDto, UserDetailsImpl userDetails) {
@@ -46,9 +47,10 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public GeneralResponseDto getPost(Long postId) {
+    public GeneralResponseDto getPost(Long postId, PageRequestDto pageRequestDto) {
         Post post = findPostById(postId);
-        return new PostResponseDto(post);
+        Page<Comment> comments = commentRepository.listOfComment(postId, pageRequestDto.createPageable());
+        return new PostResponseDto(post, comments.getContent());
     }
 
     @Transactional

@@ -30,8 +30,8 @@ public class PostController {
     }
 
     @GetMapping("/search/{postId}")
-    public GeneralResponseDto getPost(@PathVariable Long postId) {
-        return postService.getPost(postId);
+    public GeneralResponseDto getPost(@PathVariable Long postId, @ModelAttribute PageRequestDto pageRequestDto) {
+        return postService.getPost(postId, pageRequestDto);
     }
 
     @PutMapping("/{postId}")

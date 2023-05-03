@@ -1,9 +1,6 @@
 package com.example.springdevelop.controller;
 
-import com.example.springdevelop.dto.GeneralResponseDto;
-import com.example.springdevelop.dto.PageRequestDto;
-import com.example.springdevelop.dto.PostRequestDto;
-import com.example.springdevelop.dto.PostWithCommentCountDto;
+import com.example.springdevelop.dto.*;
 import com.example.springdevelop.security.UserDetailsImpl;
 import com.example.springdevelop.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +22,7 @@ public class PostController {
     }
 
     @GetMapping("/search/list")
-    public List<PostWithCommentCountDto> getAllPosts(@ModelAttribute PageRequestDto pageRequestDto) {
+    public PageResponseDto<PostWithCommentCountDto> getAllPosts(@ModelAttribute PageRequestDto pageRequestDto) {
         return postService.getAllPosts(pageRequestDto);
     }
 

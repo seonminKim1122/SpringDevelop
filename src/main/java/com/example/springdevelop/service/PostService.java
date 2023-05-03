@@ -39,18 +39,19 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostWithCommentCountDto> getAllPosts(PageRequestDto pageRequestDto) {
+    public PageResponseDto<PostWithCommentCountDto> getAllPosts(PageRequestDto pageRequestDto) {
 //        List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc();
 //        return posts.stream().map(PostResponseDto::new).collect(Collectors.toList());
         Page<PostWithCommentCountDto> posts = postRepository.listOfPost(pageRequestDto.createPageable());
-        return posts.getContent();
+        PageResponseDto<PostWithCommentCountDto> responseDto = new PageResponseDto<>(pageRequestDto, posts.getContent(), (int)posts.getTotalElements());
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
     public GeneralResponseDto getPost(Long postId, PageRequestDto pageRequestDto) {
         Post post = findPostById(postId);
         Page<Comment> comments = commentRepository.listOfComment(postId, pageRequestDto.createPageable());
-        return new PostWithCommentDto(post, comments.getContent());
+        return new PostWithCommentDto(post, pageRequestDto, comments.getContent(), (int)comments.getTotalElements());
     }
 
     @Transactional

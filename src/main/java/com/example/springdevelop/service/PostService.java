@@ -35,7 +35,7 @@ public class PostService {
         post.setUser(user);
         postRepository.save(post);
 
-        return new PostResponseDto(post);
+        return new PostWithCommentDto(post);
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +50,7 @@ public class PostService {
     public GeneralResponseDto getPost(Long postId, PageRequestDto pageRequestDto) {
         Post post = findPostById(postId);
         Page<Comment> comments = commentRepository.listOfComment(postId, pageRequestDto.createPageable());
-        return new PostResponseDto(post, comments.getContent());
+        return new PostWithCommentDto(post, comments.getContent());
     }
 
     @Transactional
